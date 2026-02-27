@@ -25,7 +25,7 @@ const hotels = require("./routes/hotels");
 const auth = require("./routes/auth");
 const bookings = require("./routes/bookings");
 //loads enc vars
-dotenv.config({ path: "./config/config.env" });
+dotenv.config({ path: "./config/config.env", override: true });
 
 //Connect db
 connectDB();
