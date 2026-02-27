@@ -6,7 +6,7 @@ const {
   createHospital,
   updateHospital,
   deleteHospital
-} = require("../controllers/hospitals");
+} = require("../controllers/hotels");
 /**
  * @swagger
  * components:
@@ -66,7 +66,7 @@ const {
  */
 
 //Include other resource routers
-const appointmentRouter = require("./appointments");
+const appointmentRouter = require("./bookings");
 
 const router = express.Router();
 

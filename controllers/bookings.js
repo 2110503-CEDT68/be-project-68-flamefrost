@@ -1,5 +1,5 @@
-const Appointment = require("../models/Appointment");
-const Hospital = require("../models/Hospital");
+const Appointment = require("../models/Booking");
+const Hospital = require("../models/Hotel");
 exports.getAppointments = async (req, res, next) => {
   let query;
 
@@ -49,12 +49,10 @@ exports.getAppointment = async (req, res, next) => {
     });
 
     if (!appointment) {
-      return res
-        .status(404)
-        .json({
-          success: false,
-          message: `No appointment with id ${req.params.id}`
-        });
+      return res.status(404).json({
+        success: false,
+        message: `No appointment with id ${req.params.id}`
+      });
     }
 
     res.status(200).json({
@@ -76,12 +74,10 @@ exports.addAppointment = async (req, res, next) => {
     const hospital = await Hospital.findById(req.params.hospitalId);
 
     if (!hospital) {
-      return res
-        .status(404)
-        .json({
-          success: false,
-          message: `No hospital with the id of ${req.params.hospitalId}`
-        });
+      return res.status(404).json({
+        success: false,
+        message: `No hospital with the id of ${req.params.hospitalId}`
+      });
     }
 
     //add user to req.body
@@ -114,12 +110,10 @@ exports.updateAppointment = async (req, res, next) => {
     let appointment = await Appointment.findById(req.params.id);
 
     if (!appointment) {
-      return res
-        .status(404)
-        .json({
-          success: false,
-          message: `No appointment with id of ${req.params.id}`
-        });
+      return res.status(404).json({
+        success: false,
+        message: `No appointment with id of ${req.params.id}`
+      });
     }
     //Make sure user role and owner
     if (
@@ -152,24 +146,20 @@ exports.deleteAppointment = async (req, res, next) => {
     const appointment = await Appointment.findById(req.params.id);
 
     if (!appointment) {
-      return res
-        .status(404)
-        .json({
-          success: false,
-          message: `No appointment with id of ${req.params.id}`
-        });
+      return res.status(404).json({
+        success: false,
+        message: `No appointment with id of ${req.params.id}`
+      });
     }
     //Make sure user role and owner
     if (
       appointment.user.toString() !== req.user.id &&
       req.user.role !== "admin"
     ) {
-      return res
-        .status(401)
-        .json({
-          success: false,
-          message: `User ${req.user.id} is not authorized to delete this appointment`
-        });
+      return res.status(401).json({
+        success: false,
+        message: `User ${req.user.id} is not authorized to delete this appointment`
+      });
     }
     await appointment.deleteOne();
     res.status(200).json({ success: true, data: {} });
