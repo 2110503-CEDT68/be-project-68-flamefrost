@@ -1,5 +1,5 @@
 const Hospital = require("../models/Hospital");
-const Appointment = require ('../models/Appointment.js')
+const Appointment = require("../models/Appointment.js");
 exports.getHospitals = async (req, res, next) => {
   let query;
 
@@ -19,11 +19,11 @@ exports.getHospitals = async (req, res, next) => {
   //Create $gt/$lt...
   queryStr = queryStr.replace(
     /\b(gt|gte|lt|lte|in)\b/g,
-    (match) => `$${match}`,
+    (match) => `$${match}`
   );
 
   //finding resource
-  query = Hospital.find(JSON.parse(queryStr)).populate('appointments');
+  query = Hospital.find(JSON.parse(queryStr)).populate("appointments");
 
   //select field
   if (req.query.select) {
@@ -57,21 +57,21 @@ exports.getHospitals = async (req, res, next) => {
     if (endIndex < total) {
       pagination.next = {
         page: page + 1,
-        limit,
+        limit
       };
     }
 
     if (startIndex > 0) {
       pagination.prev = {
         page: page - 1,
-        limit,
+        limit
       };
     }
 
     res.status(200).json({
       success: true,
       count: hospitals.length,
-      data: hospitals,
+      data: hospitals
     });
   } catch (err) {
     res.status(400).json({ success: false });
@@ -96,7 +96,7 @@ exports.createHospital = async (req, res, next) => {
   const hospital = await Hospital.create(req.body);
   res.status(201).json({
     success: true,
-    data: hospital,
+    data: hospital
   });
 };
 
@@ -104,7 +104,7 @@ exports.updateHospital = async (req, res, next) => {
   try {
     const hospital = await Hospital.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
-      runValidators: true,
+      runValidators: true
     });
     if (!hospital) {
       return res.status(400).json({ success: false });
@@ -121,11 +121,14 @@ exports.deleteHospital = async (req, res, next) => {
     const hospital = await Hospital.findById(req.params.id);
 
     if (!hospital) {
-      return res.status(404).json({ success: false,message:`Hospital not found with id of 
-          ${req.params.id}`});
+      return res.status(404).json({
+        success: false,
+        message: `Hospital not found with id of 
+          ${req.params.id}`
+      });
     }
-    await Appointment.deleteMany({hospital:req.params.id})
-    await Hospital.deleteOne({_id:req.params.id})
+    await Appointment.deleteMany({ hospital: req.params.id });
+    await Hospital.deleteOne({ _id: req.params.id });
 
     res.status(200).json({ success: true, data: {} });
   } catch (err) {

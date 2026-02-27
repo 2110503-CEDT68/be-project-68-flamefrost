@@ -1,16 +1,16 @@
-const { Pool } = require('pg');
+const { Pool } = require("pg");
 
 var connection = new Pool({
- user: process.env.USER,
- host: process.env.HOST,
- database: process.env.DATABASE,
- password: process.env.PASSWORD,
- port: process.env.DB_PORT,
+  user: process.env.USER,
+  host: process.env.HOST,
+  database: process.env.DATABASE,
+  password: process.env.PASSWORD,
+  port: process.env.DB_PORT
 });
 
 async function createAlbumsTable() {
-     try {
-     const query = `
+  try {
+    const query = `
           CREATE TABLE IF NOT EXISTS albums (
           id SERIAL PRIMARY KEY,
           title VARCHAR(255) NOT NULL,
@@ -18,12 +18,12 @@ async function createAlbumsTable() {
           price NUMERIC(10, 2)
           );
 `;
-     await connection.query(query);
-     console.log('Albums table created');
-     } catch (err) {
-     console.error(err);
-     console.error('Albums table creation failed');
-     }
+    await connection.query(query);
+    console.log("Albums table created");
+  } catch (err) {
+    console.error(err);
+    console.error("Albums table creation failed");
+  }
 }
 
 createAlbumsTable();

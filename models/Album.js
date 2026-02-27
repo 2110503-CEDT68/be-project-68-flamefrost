@@ -36,7 +36,7 @@ WHERE id = ${id}`,
       }
       // not found album with the id
       result({ msg: "not_found" }, null);
-    },
+    }
   );
 };
 

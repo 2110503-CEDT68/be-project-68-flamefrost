@@ -11,7 +11,7 @@ const { xss } = require("express-xss-sanitizer");
 const rateLimit = require("express-rate-limit");
 const limiter = rateLimit({
   windowMs: 10 * 60 * 1000, // 10mins
-  max: 100,
+  max: 100
 });
 
 const hpp = require("hpp");
@@ -59,15 +59,15 @@ const swaggerOptions = {
     info: {
       title: "Library API",
       version: "1.0.0",
-      description: "A simple Express VacQ API",
+      description: "A simple Express VacQ API"
     },
     servers: [
       {
-        url: "http://localhost:5000",
-      },
-    ],
+        url: "http://localhost:5000"
+      }
+    ]
   },
-  apis: ["./routes/*.js"],
+  apis: ["./routes/*.js"]
 };
 
 const server = app.listen(
@@ -76,10 +76,9 @@ const server = app.listen(
     "Server running in ",
     process.env.NODE_ENV,
     " mode on port ",
-    PORT,
-  ),
+    PORT
+  )
 );
-
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
 app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerDocs));
