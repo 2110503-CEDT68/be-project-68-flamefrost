@@ -1,17 +1,17 @@
 const express = require("express");
 
 const {
-  getHospitals,
-  getHospital,
-  createHospital,
-  updateHospital,
-  deleteHospital
+  getHotels,
+  getHotel,
+  createHotel,
+  updateHotel,
+  deleteHotel
 } = require("../controllers/hotels");
 /**
  * @swagger
  * components:
  *   schemas:
- *     Hospital:
+ *     Hotel:
  *       type: object
  *       required:
  *         - name
@@ -20,14 +20,14 @@ const {
  *         id:
  *           type: string
  *           format: uuid
- *           description: The auto-generated id of the hospital
+ *           description: The auto-generated id of the hotel
  *           example: d290f1ee-6c54-4b01-90e6-d701748f0851
  *         ลําดับ:
  *           type: string
  *           description: Ordinal number
  *         name:
  *           type: string
- *           description: Hospital name
+ *           description: Hotel name
  *         address:
  *           type: string
  *           description: House No., Street, Road
@@ -49,7 +49,7 @@ const {
  *       example:
  *         id: 609bda561452242d88d36e37
  *         ลําดับ: 121
- *         name: Happy Hospital
+ *         name: Happy Hotel
  *         address: 121 ถ.สุขุมวิท
  *         district: บางนา
  *         province: กรุงเทพมหานคร
@@ -61,140 +61,137 @@ const {
 /**
  * @swagger
  * tags:
- *   name: Hospitals
- *   description: The hospitals managing API
+ *   name: Hotels
+ *   description: The hotels managing API
  */
 
 //Include other resource routers
-const appointmentRouter = require("./bookings");
+const bookingRouter = require("./bookings");
 
 const router = express.Router();
 
 const { protect, authorize } = require("../middleware/auth");
 
 //Re-route into other resource routers
-router.use("/:hospitalId/appointments", appointmentRouter);
+router.use("/:hotelId/bookings", bookingRouter);
 
 /**
  * @swagger
- * /api/v1/hospitals:
+ * /api/v1/hotels:
  *   get:
- *     summary: Returns the list of all the hospitals
- *     tags: [Hospitals]
+ *     summary: Returns the list of all the hotels
+ *     tags: [Hotels]
  *     responses:
  *       200:
- *         description: The list of the hospitals
+ *         description: The list of the hotels
  *         content:
  *           application/json:
  *             schema:
  *               type: array
  *               items:
- *                 $ref: '#/components/schemas/Hospital'
+ *                 $ref: '#/components/schemas/Hotel'
  */
 /**
  * @swagger
- * /api/v1/hospitals:
+ * /api/v1/hotels:
  *   post:
- *     summary: Create a new hospital
- *     tags: [Hospitals]
+ *     summary: Create a new hotel
+ *     tags: [Hotels]
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Hospital'
+ *             $ref: '#/components/schemas/Hotel'
  *     responses:
  *       201:
- *         description: The hospital was successfully created
+ *         description: The hotel was successfully created
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Hospital'
+ *               $ref: '#/components/schemas/Hotel'
  *       500:
  *         description: Some server error
  */
-router
-  .route("/")
-  .get(getHospitals)
-  .post(protect, authorize("admin"), createHospital);
+router.route("/").get(getHotels).post(protect, authorize("admin"), createHotel);
 
 /**
  * @swagger
- * /api/v1/hospitals/{id}:
+ * /api/v1/hotels/{id}:
  *   get:
- *     summary: Get the hospital by id
- *     tags: [Hospitals]
+ *     summary: Get the hotel by id
+ *     tags: [Hotels]
  *     parameters:
  *       - in: path
  *         name: id
  *         schema:
  *           type: string
  *         required: true
- *         description: The hospital id
+ *         description: The hotel id
  *     responses:
  *       200:
- *         description: The hospital description by id
+ *         description: The hotel description by id
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Hospital'
+ *               $ref: '#/components/schemas/Hotel'
  *       404:
- *         description: The hospital was not found
+ *         description: The hotel was not found
  */
 /**
  * @swagger
- * /api/v1/hospitals/{id}:
+ * /api/v1/hotels/{id}:
  *   put:
- *     summary: Update the hospital by the id
- *     tags: [Hospitals]
+ *     summary: Update the hotel by the id
+ *     tags: [Hotels]
  *     parameters:
  *       - in: path
  *         name: id
  *         schema:
  *           type: string
  *         required: true
- *         description: The hospital id
+ *         description: The hotel id
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Hospital'
+ *             $ref: '#/components/schemas/Hotel'
  *     responses:
  *       200:
- *         description: The hospital was updated
+ *         description: The hotel was updated
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Hospital'
+ *               $ref: '#/components/schemas/Hotel'
  *       404:
- *         description: The hospital was not found
+ *         description: The hotel was not found
  *       500:
  *         description: Some error happened
  */
 /**
  * @swagger
- * /api/v1/hospitals/{id}:
+ * /api/v1/hotels/{id}:
  *   delete:
- *     summary: Remove the hospital by id
- *     tags: [Hospitals]
+ *     summary: Remove the hotel by id
+ *     tags: [Hotels]
  *     parameters:
  *       - in: path
  *         name: id
  *         schema:
  *           type: string
  *         required: true
- *         description: The hospital id
+ *         description: The hotel id
  *     responses:
  *       200:
- *         description: The hospital was deleted
+ *         description: The hotel was deleted
  *       404:
- *         description: The hospital was not found
+ *         description: The hotel was not found
  */
 router
   .route("/:id")
-  .get(getHospital)
-  .put(protect, authorize("admin"), updateHospital)
-  .delete(protect, authorize("admin"), deleteHospital);
+  .get(getHotel)
+  .put(protect, authorize("admin"), updateHotel)
+  .delete(protect, authorize("admin"), deleteHotel);
 
 module.exports = router;
