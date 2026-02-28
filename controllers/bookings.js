@@ -77,7 +77,7 @@ exports.getBooking = async (req, res, next) => {
 
 exports.addBooking = async (req, res, next) => {
   try {
-    req.body.hotel = req.params.hotelId;
+    req.body.hotel = req.body.hotelId;
 
     // Validate required fields
     if (!req.body.checkInDate) {
@@ -102,12 +102,12 @@ exports.addBooking = async (req, res, next) => {
       });
     }
 
-    const hotel = await Hotel.findById(req.params.hotelId);
+    const hotel = await Hotel.findById(req.body.hotelId);
 
     if (!hotel) {
       return res.status(404).json({
         success: false,
-        message: `No hotel with the id of ${req.params.hotelId}`
+        message: `No hotel with the id of ${req.body.hotelId}`
       });
     }
 
@@ -130,7 +130,12 @@ exports.addBooking = async (req, res, next) => {
           checkInDate: { $lt: checkInDate },
           $expr: {
             $gte: [
-              { $add: ["$checkInDate", { $multiply: ["$nights", 24 * 60 * 60 * 1000] }] },
+              {
+                $add: [
+                  "$checkInDate",
+                  { $multiply: ["$nights", 24 * 60 * 60 * 1000] }
+                ]
+              },
               checkInDate
             ]
           }
