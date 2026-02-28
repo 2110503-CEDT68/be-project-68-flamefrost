@@ -55,6 +55,14 @@ exports.getBooking = async (req, res, next) => {
       });
     }
 
+    // restrict non-admin to own booking
+    if (booking.user.toString() !== req.user.id && req.user.role !== "admin") {
+      return res.status(401).json({
+        success: false,
+        message: `User ${req.user.id} is not authorized to view this booking`
+      });
+    }
+
     res.status(200).json({
       success: true,
       data: booking
@@ -71,6 +79,29 @@ exports.addBooking = async (req, res, next) => {
   try {
     req.body.hotel = req.params.hotelId;
 
+    // Validate required fields
+    if (!req.body.checkInDate) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide a check-in date"
+      });
+    }
+
+    if (!req.body.nights) {
+      return res.status(400).json({
+        success: false,
+        message: "Please specify number of nights"
+      });
+    }
+
+    // Validate nights is between 1 and 3
+    if (req.body.nights < 1 || req.body.nights > 3) {
+      return res.status(400).json({
+        success: false,
+        message: "Number of nights must be between 1 and 3"
+      });
+    }
+
     const hotel = await Hotel.findById(req.params.hotelId);
 
     if (!hotel) {
@@ -80,14 +111,34 @@ exports.addBooking = async (req, res, next) => {
       });
     }
 
-    //add user to req.body
+    // Add user to req.body
     req.body.user = req.user.id;
 
-    //check Exist booking
-    const existBookings = await Booking.find({ user: req.user.id });
+    // Check for overlapping bookings for the same user
+    const checkInDate = new Date(req.body.checkInDate);
+    const checkOutDate = new Date(checkInDate);
+    checkOutDate.setDate(checkOutDate.getDate() + req.body.nights);
 
-    //If user not admin,they can create only 3 booking
-    if (existBookings.length >= 3 && req.user.role !== "admin") {
+    const overlappingBookings = await Booking.find({
+      user: req.user.id,
+      $or: [
+        {
+          checkInDate: { $lt: checkOutDate },
+          checkInDate: { $gte: checkInDate }
+        },
+        {
+          checkInDate: { $lt: checkInDate },
+          $expr: {
+            $gte: [
+              { $add: ["$checkInDate", { $multiply: ["$nights", 24 * 60 * 60 * 1000] }] },
+              checkInDate
+            ]
+          }
+        }
+      ]
+    });
+
+    if (overlappingBookings.length > 0 && req.user.role !== "admin") {
       return res.status(400).json({
         success: false,
         message: `The user with ID ${req.user.id} has 
@@ -99,6 +150,7 @@ exports.addBooking = async (req, res, next) => {
 
     res.status(200).json({ success: true, data: booking });
   } catch (err) {
+    console.log(err);
     return res
       .status(500)
       .json({ success: false, message: "Cannot create Booking" });
