@@ -146,8 +146,7 @@ exports.addBooking = async (req, res, next) => {
     if (overlappingBookings.length > 0 && req.user.role !== "admin") {
       return res.status(400).json({
         success: false,
-        message: `The user with ID ${req.user.id} has 
-                    already made 3 bookings`
+        message: `The user with ID ${req.user.id} has an overlapping booking.`
       });
     }
 
