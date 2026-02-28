@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const BookingSchema = new mongoose.Schema({
-  apptDate: {
+  checkInDate: {
     type: Date,
     required: [true, "Please add a check-in date"]
   },
@@ -28,7 +28,7 @@ const BookingSchema = new mongoose.Schema({
 });
 
 // Virtual field for checkout date
-BookingSchema.virtual("checkOutDate").get(function() {
+BookingSchema.virtual("checkOutDate").get(function () {
   const checkOut = new Date(this.checkInDate);
   checkOut.setDate(checkOut.getDate() + this.nights);
   return checkOut;
