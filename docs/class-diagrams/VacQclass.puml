@@ -1,0 +1,73 @@
+@startuml Hotel Booking
+left to right direction
+package "HotelBooking"{
+
+    package "Hotel" {
+
+      class "<<Application>>\nHotel" as HotelBookingService{}
+
+      class "<<Resource>>\nHotels" as ResourceHotels{
+          <<GET>> +getHotels(): Hotel
+      }
+
+      class "<<Resource>>\nHotel" as ResourceHotel {
+          <<GET>> +getHotel(): Hotel
+      }
+
+      class "<<Representation>>\nHotel" as RepresentationHotel {
+          -name
+          -address
+          -district
+          -province
+          -postalcode
+          -telephone
+          -region
+      }
+
+    }
+
+    package "Booking" {
+      class "<<Application>>\nBooking" as Bookings{}
+
+      class "<<Resource>>\nBookings" as ResourceBookings{
+          <<GET>> +getBookings(): Booking
+          <<POST>> +addBooking(): Booking
+      }
+
+      class "<<Resource>>\nBooking" as ResourceBooking {
+          <<GET>> +getBooking(): Booking
+          <<PUT>> +updateBooking(): Booking
+          <<DELETE>> +deleteBooking(): Booking
+      }
+
+      class "<<Representation>>\nBooking" as RepresentationBooking {
+          -checkInDate
+          -nights
+          -user
+          -hotel
+          -reservationTimestamp
+      }
+
+    }
+
+    package "User" {
+      class "<<Representation>>\nUser" as RepresentationUser {
+          -name
+          -email
+          -telephone
+          -role
+          -password
+      }
+    }
+
+}
+
+HotelBookingService ..> ResourceHotels:"/hotels\n<<Path>>"
+ResourceHotels ..> ResourceHotel: "/{id}\n<<Path>>"
+ResourceHotel ..> RepresentationHotel: "<<use>>"
+
+Bookings ..> ResourceBookings:"/bookings\n<<Path>>"
+ResourceBookings ..> ResourceBooking:"/bookings/{id}\n<<Path>>"
+ResourceBooking ..> RepresentationBooking:"<<use>>"
+
+@enduml
