@@ -1,0 +1,21 @@
+@startuml Get All Hotels (GET)
+
+title "Get All Hotels (GET)"
+
+participant "Client" as client
+participant "<<javaScript>>\n:server" as server
+participant "<<router>>\n:hotels" as routerHotels
+participant "<<controllers>>\n:hotels" as controllersHotels
+participant "<<model>>\n:Hotel" as modelHotel
+database "<<MongoDB>>\n:hotels" as HotelsDatabase
+
+client->server ++:req.get('/api/v1/hotels')
+server->routerHotels ++:app.use('/api/v1/hotels',hotels)
+routerHotels -> controllersHotels ++:getHotels()
+controllersHotels->modelHotel ++:find()
+modelHotel ->HotelsDatabase ++: HotelSchema
+HotelsDatabase --> modelHotel --: hotel
+controllersHotels <-- modelHotel --:hotel
+controllersHotels->client --:response
+
+@enduml
