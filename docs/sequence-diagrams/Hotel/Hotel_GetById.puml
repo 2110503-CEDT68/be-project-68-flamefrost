@@ -18,7 +18,7 @@ Client -> "<<JavaScript>>\nServer": GET /api/v1/hotels/:id
 "<<Model>>\nHotel" --> "<<Controllers>>\nHotels": Hotel object
 
 alt Hotel Not Found
-  "<<Controllers>>\nHotels" --> "<<JavaScript>>\nServer": 400 Bad Request
+  "<<Controllers>>\nHotels" --> "<<JavaScript>>\nServer": 404 Not Found
   "<<JavaScript>>\nServer" --> Client: {success: false, msg: "Hotel not found"}
 else Hotel Found
   "<<Controllers>>\nHotels" --> "<<JavaScript>>\nServer": 200 OK
