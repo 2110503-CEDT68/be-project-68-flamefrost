@@ -57,7 +57,7 @@ exports.getBooking = async (req, res, next) => {
 
     // restrict non-admin to own booking
     if (booking.user.toString() !== req.user.id && req.user.role !== "admin") {
-      return res.status(401).json({
+      return res.status(403).json({
         success: false,
         message: `User ${req.user.id} is not authorized to view this booking`
       });
@@ -173,7 +173,7 @@ exports.updateBooking = async (req, res, next) => {
     }
     //Make sure user role and owner
     if (booking.user.toString() !== req.user.id && req.user.role !== "admin") {
-      return res.status(401).json({
+      return res.status(403).json({
         success: false,
         message: `User ${req.user.id} 
                     is not authorized to update this booking`
@@ -206,7 +206,7 @@ exports.deleteBooking = async (req, res, next) => {
     }
     //Make sure user role and owner
     if (booking.user.toString() !== req.user.id && req.user.role !== "admin") {
-      return res.status(401).json({
+      return res.status(403).json({
         success: false,
         message: `User ${req.user.id} is not authorized to delete this booking`
       });

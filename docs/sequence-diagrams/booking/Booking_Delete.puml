@@ -24,7 +24,7 @@ alt Booking Not Found
   "<<JavaScript>>\nServer" --> Client: {success: false, msg: "Not found"}
 else Authorization Check
   alt User NOT Owner & NOT Admin
-    "<<Controllers>>\nBookings" --> "<<JavaScript>>\nServer": 401 Unauthorized
+    "<<Controllers>>\nBookings" --> "<<JavaScript>>\nServer": 403 Forbidden
     "<<JavaScript>>\nServer" --> Client: {success: false, msg: "Not authorized"}
   else User Owner OR Admin
     "<<Controllers>>\nBookings" -> "<<Model>>\nBooking": Delete booking
