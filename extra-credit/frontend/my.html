@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hotel Listing™</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <form>
+    Email: <input name="email" type="email" autocomplete="off">
+    <br>
+    Password: <input name="password" type="password" autocomplete="off">
+  </form>
+  <button onclick="lookup()">Submit</button>
+  <hr>
+  <table>
+    <thead>
+      <tr>
+        <th>Start</th>
+        <th>Night</th>
+        <th>Hotel</th>
+      </tr>
+    </thead>
+    <tbody id="my-bookings-body">
+    </tbody>
+  </table>
+  <script src="./my.js"></script>
+</body>
+
+</html>

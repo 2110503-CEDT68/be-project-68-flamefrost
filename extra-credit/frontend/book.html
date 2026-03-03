@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hotel Listing™</title>
+  <link rel="stylesheet" href="styles.css">
+
+</head>
+
+<body>
+  About to book at <span id="hotel-name"></span>
+  <br>
+  <br>
+  <form>
+    Email: <input name="email" type="email" autocomplete="off">
+    <br>
+    Password: <input name="password" type="password" autocomplete="off">
+    <hr>
+    Check In: <input name="checkInDate" type="date">
+    <br>
+    Days: <input name="nights" type="number" min="1" max="3" placeholder="1">
+    <br>
+  </form>
+  <br>
+  <button onclick="sendBookingRequest()">Submit</button>
+  <script src="./book.js"></script>
+</body>
+
+</html>
