@@ -1,0 +1,38 @@
+@startuml Hotel_Create
+title Create Hotel (POST)
+
+actor Client
+participant "<<JavaScript>>\nServer"
+participant "<<Router>>\nHotels"
+participant "<<Middleware>>\nAuth"
+participant "<<Controllers>>\nHotels"
+participant "<<Model>>\nHotel"
+database "<<MongoDB>>\nHotels"
+
+Client -> "<<JavaScript>>\nServer": POST /api/v1/hotels\n{name, address, district, province, postalcode, region}\nAuth: Bearer TOKEN
+"<<JavaScript>>\nServer" -> "<<Router>>\nHotels": app.use('/api/v1/hotels')
+"<<Router>>\nHotels" -> "<<Middleware>>\nAuth": protect()
+"<<Middleware>>\nAuth" -> "<<Middleware>>\nAuth": Verify JWT token
+
+alt Token Invalid/Missing
+  "<<Middleware>>\nAuth" --> "<<JavaScript>>\nServer": 401 Unauthorized
+  "<<JavaScript>>\nServer" --> Client: {success: false, msg: "No token"}
+else Token Valid
+  "<<Middleware>>\nAuth" -> "<<Middleware>>\nAuth": authorize('admin')
+  
+  alt User NOT Admin
+    "<<Middleware>>\nAuth" --> "<<JavaScript>>\nServer": 403 Forbidden
+    "<<JavaScript>>\nServer" --> Client: {success: false, msg: "Not authorized"}
+  else User is Admin
+    "<<Middleware>>\nAuth" -> "<<Controllers>>\nHotels": createHotel()
+    "<<Controllers>>\nHotels" -> "<<Controllers>>\nHotels": Validate input
+    "<<Controllers>>\nHotels" -> "<<Model>>\nHotel": create({name, address, ...})
+    "<<Model>>\nHotel" -> "<<MongoDB>>\nHotels": Insert hotel
+    "<<MongoDB>>\nHotels" --> "<<Model>>\nHotel": Hotel created
+    "<<Model>>\nHotel" --> "<<Controllers>>\nHotels": Hotel object
+    "<<Controllers>>\nHotels" --> "<<JavaScript>>\nServer": 201 Created
+    "<<JavaScript>>\nServer" --> Client: {success: true, data: hotel}
+  end
+end
+
+@enduml

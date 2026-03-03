@@ -1,0 +1,89 @@
+@startuml Class_Diagram
+!theme plain
+title FlameFrost Hotel Booking System - UML Class Diagram
+
+class User {
+  - _id: ObjectId <<PK>>
+  - name: String
+  - email: String <<UNIQUE>>
+  - tel: String
+  - role: String (enum: "user", "admin")
+  - password: String <<hashed>>
+  - resetPasswordToken: String
+  - resetPasswordExpire: Date
+  - createdAt: Date <<auto>>
+  --
+  + register(name, email, password, tel, role)
+  + login(email, password)
+  + getProfile()
+  + logout()
+  + updatePassword(oldPassword, newPassword)
+  + resetPassword(token, newPassword)
+}
+
+class Booking {
+  - _id: ObjectId <<PK>>
+  - checkInDate: Date <<required>>
+  - nights: Number (1-3) <<required>>
+  - user: ObjectId <<FK to User>>
+  - hotel: ObjectId <<FK to Hotel>>
+  - createdAt: Date <<auto>>
+  - checkOutDate: Date <<virtual calculated>>
+  --
+  + create(hotelId, checkInDate, nights)
+  + findById(id)
+  + findByUser(userId)
+  + findByHotel(hotelId)
+  + update(checkInDate, nights)
+  + delete()
+  + calculateCheckout()
+}
+
+class Hotel {
+  - _id: ObjectId <<PK>>
+  - name: String <<UNIQUE, max: 50>>
+  - address: String <<required>>
+  - district: String <<required>>
+  - province: String <<required>>
+  - postalcode: String <<max: 5>>
+  - tel: String
+  - region: String <<required>>
+  - bookings: Booking[] <<virtual reverse populate>>
+  --
+  + create(name, address, district, province, postalcode, tel, region)
+  + findById(id)
+  + findAll(filters, sort, pagination)
+  + update(fields)
+  + delete()
+  + getBookings()
+}
+
+User "1" -- "*" Booking : creates >
+Booking "*" -- "1" Hotel : books >
+Hotel "1" -- "*" Booking : has >
+
+note right of User
+  Role-based access control:
+  - user: can create/view own bookings
+  - admin: can manage hotels & all bookings
+end note
+
+note right of Booking
+  Constraints:
+  - nights: must be 1-3
+  - checkInDate: required
+  - Non-admin users cannot have
+    overlapping bookings
+  - Deleted when parent hotel deleted
+end note
+
+note right of Hotel
+  Features:
+  - Supports filtering, sorting, pagination
+  - Virtual populate of bookings
+  - Cascade delete of bookings
+  - Public read endpoints
+  - Admin-only write endpoints
+end note
+
+@enduml

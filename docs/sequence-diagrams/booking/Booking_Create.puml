@@ -1,0 +1,45 @@
+@startuml Booking_Create
+title Create Booking (POST)
+
+actor Client
+participant "<<JavaScript>>\nServer"
+participant "<<Router>>\nBookings"
+participant "<<Middleware>>\nAuth"
+participant "<<Controllers>>\nBookings"
+participant "<<Model>>\nBooking"
+database "<<MongoDB>>\nBookings"
+
+Client -> "<<JavaScript>>\nServer": POST /api/v1/bookings\n{hotelId, checkInDate, nights}
+"<<JavaScript>>\nServer" -> "<<Router>>\nBookings": app.use('/api/v1/bookings')
+"<<Router>>\nBookings" -> "<<Middleware>>\nAuth": protect()
+"<<Middleware>>\nAuth" -> "<<Middleware>>\nAuth": Verify JWT token
+"<<Middleware>>\nAuth" -> "<<Controllers>>\nBookings": createBooking()
+"<<Controllers>>\nBookings" -> "<<Controllers>>\nBookings": Validate input\n(date, nights)
+
+alt Validation Failed
+  "<<Controllers>>\nBookings" --> "<<JavaScript>>\nServer": 400 Bad Request
+  "<<JavaScript>>\nServer" --> Client: {success: false}
+else Validation Passed
+  "<<Controllers>>\nBookings" -> "<<Controllers>>\nBookings": Check hotel exists
+  
+  alt Hotel Not Found
+    "<<Controllers>>\nBookings" --> "<<JavaScript>>\nServer": 404 Not Found
+    "<<JavaScript>>\nServer" --> Client: {success: false, msg: "Hotel not found"}
+  else Hotel Found
+    "<<Controllers>>\nBookings" -> "<<Controllers>>\nBookings": Check overlap (non-admin)
+    
+    alt Overlap Exists
+      "<<Controllers>>\nBookings" --> "<<JavaScript>>\nServer": 400 Bad Request
+      "<<JavaScript>>\nServer" --> Client: {success: false, msg: "Overlapping booking"}
+    else No Overlap
+      "<<Controllers>>\nBookings" -> "<<Model>>\nBooking": create({checkInDate, nights, user, hotel})
+      "<<Model>>\nBooking" -> "<<MongoDB>>\nBookings": Insert booking
+      "<<MongoDB>>\nBookings" --> "<<Model>>\nBooking": Booking created
+      "<<Model>>\nBooking" --> "<<Controllers>>\nBookings": Booking object
+      "<<Controllers>>\nBookings" --> "<<JavaScript>>\nServer": 201 Created
+      "<<JavaScript>>\nServer" --> Client: {success: true, data: booking}
+    end
+  end
+end
+
+@enduml

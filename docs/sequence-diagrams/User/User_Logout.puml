@@ -1,0 +1,16 @@
+@startuml User_Logout
+title User Logout (GET)
+
+actor Client
+participant "<<JavaScript>>\nServer"
+participant "<<Router>>\nAuth"
+participant "<<Controllers>>\nAuth"
+
+Client -> "<<JavaScript>>\nServer": GET /api/v1/auth/logout
+"<<JavaScript>>\nServer" -> "<<Router>>\nAuth": app.use('/api/v1/auth')
+"<<Router>>\nAuth" -> "<<Controllers>>\nAuth": logout()
+"<<Controllers>>\nAuth" -> "<<Controllers>>\nAuth": Clear/Expire cookie
+"<<Controllers>>\nAuth" --> "<<JavaScript>>\nServer": 200 OK
+"<<JavaScript>>\nServer" --> Client: {success: true, data: {}}
+
+@enduml

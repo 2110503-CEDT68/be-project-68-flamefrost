@@ -1,0 +1,33 @@
+@startuml User_Register
+title User Register (POST)
+
+actor Client
+participant "<<JavaScript>>\nServer"
+participant "<<Router>>\nAuth"
+participant "<<Controllers>>\nAuth"
+participant "<<Model>>\nUser"
+database "<<MongoDB>>\nUsers"
+
+Client -> "<<JavaScript>>\nServer": POST /api/v1/auth/register\n{name, email, password, role, tel}
+"<<JavaScript>>\nServer" -> "<<Router>>\nAuth": app.use('/api/v1/auth')
+"<<Router>>\nAuth" -> "<<Controllers>>\nAuth": register()
+"<<Controllers>>\nAuth" -> "<<Model>>\nUser": findOne({email})
+"<<Model>>\nUser" -> "<<MongoDB>>\nUsers": Query user
+"<<MongoDB>>\nUsers" --> "<<Model>>\nUser": User found/not found
+"<<Model>>\nUser" --> "<<Controllers>>\nAuth": email exists?
+
+alt Email Exists
+  "<<Controllers>>\nAuth" --> "<<JavaScript>>\nServer": 400 Bad Request
+  "<<JavaScript>>\nServer" --> Client: {success: false}
+else Email Available
+  "<<Controllers>>\nAuth" -> "<<Controllers>>\nAuth": Hash password\n(bcryptjs)
+  "<<Controllers>>\nAuth" -> "<<Model>>\nUser": create({name, email, hash, role, tel})
+  "<<Model>>\nUser" -> "<<MongoDB>>\nUsers": Insert user
+  "<<MongoDB>>\nUsers" --> "<<Model>>\nUser": User created with _id
+  "<<Model>>\nUser" --> "<<Controllers>>\nAuth": User object
+  "<<Controllers>>\nAuth" -> "<<Controllers>>\nAuth": Sign JWT token
+  "<<Controllers>>\nAuth" --> "<<JavaScript>>\nServer": 201 Created {token}
+  "<<JavaScript>>\nServer" --> Client: {success: true, token: JWT}
+end
+
+@enduml

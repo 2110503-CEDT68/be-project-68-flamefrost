@@ -1,0 +1,35 @@
+@startuml User_Login
+title User Login (POST)
+
+actor Client
+participant "<<JavaScript>>\nServer"
+participant "<<Router>>\nAuth"
+participant "<<Controllers>>\nAuth"
+participant "<<Model>>\nUser"
+database "<<MongoDB>>\nUsers"
+
+Client -> "<<JavaScript>>\nServer": POST /api/v1/auth/login\n{email, password}
+"<<JavaScript>>\nServer" -> "<<Router>>\nAuth": app.use('/api/v1/auth')
+"<<Router>>\nAuth" -> "<<Controllers>>\nAuth": login()
+"<<Controllers>>\nAuth" -> "<<Model>>\nUser": findOne({email})
+"<<Model>>\nUser" -> "<<MongoDB>>\nUsers": Query user
+"<<MongoDB>>\nUsers" --> "<<Model>>\nUser": User document
+"<<Model>>\nUser" --> "<<Controllers>>\nAuth": User with hash
+
+alt User Not Found
+  "<<Controllers>>\nAuth" --> "<<JavaScript>>\nServer": 401 Unauthorized
+  "<<JavaScript>>\nServer" --> Client: {success: false, msg: "Invalid credentials"}
+else User Found
+  "<<Controllers>>\nAuth" -> "<<Controllers>>\nAuth": Compare passwords\n(bcrypt)
+  
+  alt Password Incorrect
+    "<<Controllers>>\nAuth" --> "<<JavaScript>>\nServer": 401 Unauthorized
+    "<<JavaScript>>\nServer" --> Client: {success: false, msg: "Invalid credentials"}
+  else Password Correct
+    "<<Controllers>>\nAuth" -> "<<Controllers>>\nAuth": Sign JWT token
+    "<<Controllers>>\nAuth" --> "<<JavaScript>>\nServer": 200 OK {token}
+    "<<JavaScript>>\nServer" --> Client: {success: true, token: JWT}
+  end
+end
+
+@enduml

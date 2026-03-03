@@ -1,0 +1,28 @@
+@startuml Hotel_GetById
+title Get Hotel by ID (GET)
+
+actor Client
+participant "<<JavaScript>>\nServer"
+participant "<<Router>>\nHotels"
+participant "<<Controllers>>\nHotels"
+participant "<<Model>>\nHotel"
+database "<<MongoDB>>\nHotels"
+
+Client -> "<<JavaScript>>\nServer": GET /api/v1/hotels/:id
+"<<JavaScript>>\nServer" -> "<<Router>>\nHotels": app.use('/api/v1/hotels')
+"<<Router>>\nHotels" -> "<<Controllers>>\nHotels": getHotel(id)
+"<<Controllers>>\nHotels" -> "<<Model>>\nHotel": findById(id)
+"<<Model>>\nHotel" -> "<<MongoDB>>\nHotels": Query hotel by ID
+"<<MongoDB>>\nHotels" --> "<<Model>>\nHotel": Hotel document
+"<<Model>>\nHotel" -> "<<Model>>\nHotel": Populate bookings (virtual)
+"<<Model>>\nHotel" --> "<<Controllers>>\nHotels": Hotel object
+
+alt Hotel Not Found
+  "<<Controllers>>\nHotels" --> "<<JavaScript>>\nServer": 400 Bad Request
+  "<<JavaScript>>\nServer" --> Client: {success: false, msg: "Hotel not found"}
+else Hotel Found
+  "<<Controllers>>\nHotels" --> "<<JavaScript>>\nServer": 200 OK
+  "<<JavaScript>>\nServer" --> Client: {success: true, data: hotel}
+end
+
+@enduml

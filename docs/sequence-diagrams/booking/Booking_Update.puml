@@ -1,0 +1,40 @@
+@startuml Booking_Update
+title Update Booking (PUT)
+
+actor Client
+participant "<<JavaScript>>\nServer"
+participant "<<Router>>\nBookings"
+participant "<<Middleware>>\nAuth"
+participant "<<Controllers>>\nBookings"
+participant "<<Model>>\nBooking"
+database "<<MongoDB>>\nBookings"
+
+Client -> "<<JavaScript>>\nServer": PUT /api/v1/bookings/:id\n{checkInDate?, nights?}
+"<<JavaScript>>\nServer" -> "<<Router>>\nBookings": app.use('/api/v1/bookings')
+"<<Router>>\nBookings" -> "<<Middleware>>\nAuth": protect()
+"<<Middleware>>\nAuth" -> "<<Middleware>>\nAuth": Verify JWT token
+"<<Middleware>>\nAuth" -> "<<Controllers>>\nBookings": updateBooking(id)
+"<<Controllers>>\nBookings" -> "<<Model>>\nBooking": findById(id)
+"<<Model>>\nBooking" -> "<<MongoDB>>\nBookings": Query booking
+"<<MongoDB>>\nBookings" --> "<<Model>>\nBooking": Booking document
+"<<Model>>\nBooking" --> "<<Controllers>>\nBookings": Booking object
+
+alt Booking Not Found
+  "<<Controllers>>\nBookings" --> "<<JavaScript>>\nServer": 404 Not Found
+  "<<JavaScript>>\nServer" --> Client: {success: false, msg: "Not found"}
+else Authorization Check
+  alt User NOT Owner & NOT Admin
+    "<<Controllers>>\nBookings" --> "<<JavaScript>>\nServer": 401 Unauthorized
+    "<<JavaScript>>\nServer" --> Client: {success: false, msg: "Not authorized"}
+  else User Owner OR Admin
+    "<<Controllers>>\nBookings" -> "<<Model>>\nBooking": Update fields
+    "<<Model>>\nBooking" -> "<<MongoDB>>\nBookings": Update document
+    "<<MongoDB>>\nBookings" --> "<<Model>>\nBooking": Updated booking
+    "<<Model>>\nBooking" -> "<<Model>>\nBooking": Populate hotel references
+    "<<Model>>\nBooking" --> "<<Controllers>>\nBookings": Updated booking object
+    "<<Controllers>>\nBookings" --> "<<JavaScript>>\nServer": 200 OK
+    "<<JavaScript>>\nServer" --> Client: {success: true, data: booking}
+  end
+end
+
+@enduml

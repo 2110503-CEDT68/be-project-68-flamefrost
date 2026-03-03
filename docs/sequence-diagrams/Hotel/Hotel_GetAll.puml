@@ -1,0 +1,23 @@
+@startuml Hotel_GetAll
+title Get All Hotels (GET)
+
+actor Client
+participant "<<JavaScript>>\nServer"
+participant "<<Router>>\nHotels"
+participant "<<Controllers>>\nHotels"
+participant "<<Model>>\nHotel"
+database "<<MongoDB>>\nHotels"
+
+Client -> "<<JavaScript>>\nServer": GET /api/v1/hotels\n?page=1&limit=25&sort=-createdAt
+"<<JavaScript>>\nServer" -> "<<Router>>\nHotels": app.use('/api/v1/hotels')
+"<<Router>>\nHotels" -> "<<Controllers>>\nHotels": getHotels()
+"<<Controllers>>\nHotels" -> "<<Controllers>>\nHotels": Parse filters, sort, pagination
+"<<Controllers>>\nHotels" -> "<<Model>>\nHotel": find(filters)\n.sort(sort)\n.skip().limit()
+"<<Model>>\nHotel" -> "<<MongoDB>>\nHotels": Query with filters
+"<<MongoDB>>\nHotels" --> "<<Model>>\nHotel": Hotels array
+"<<Model>>\nHotel" -> "<<Model>>\nHotel": Populate bookings (virtual)
+"<<Model>>\nHotel" --> "<<Controllers>>\nHotels": Hotels with populated data
+"<<Controllers>>\nHotels" --> "<<JavaScript>>\nServer": 200 OK
+"<<JavaScript>>\nServer" --> Client: {success: true, count: X, data: hotels}
+
+@enduml

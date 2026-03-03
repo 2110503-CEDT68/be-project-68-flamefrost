@@ -1,0 +1,33 @@
+@startuml Booking_GetAll
+title Get All Bookings (GET)
+
+actor Client
+participant "<<JavaScript>>\nServer"
+participant "<<Router>>\nBookings"
+participant "<<Middleware>>\nAuth"
+participant "<<Controllers>>\nBookings"
+participant "<<Model>>\nBooking"
+database "<<MongoDB>>\nBookings"
+
+Client -> "<<JavaScript>>\nServer": GET /api/v1/bookings\nAuth: Bearer TOKEN
+"<<JavaScript>>\nServer" -> "<<Router>>\nBookings": app.use('/api/v1/bookings')
+"<<Router>>\nBookings" -> "<<Middleware>>\nAuth": protect()
+"<<Middleware>>\nAuth" -> "<<Middleware>>\nAuth": Verify JWT token
+"<<Middleware>>\nAuth" -> "<<Controllers>>\nBookings": getAllBookings()
+
+alt User is Admin
+  note over "<<Controllers>>\nBookings": Return all bookings
+  "<<Controllers>>\nBookings" -> "<<Model>>\nBooking": find({})
+else User is Regular
+  note over "<<Controllers>>\nBookings": Return only own bookings
+  "<<Controllers>>\nBookings" -> "<<Model>>\nBooking": find({user: userId})
+end
+
+"<<Model>>\nBooking" -> "<<MongoDB>>\nBookings": Query bookings
+"<<MongoDB>>\nBookings" --> "<<Model>>\nBooking": Bookings array
+"<<Model>>\nBooking" -> "<<Model>>\nBooking": Populate hotel references
+"<<Model>>\nBooking" --> "<<Controllers>>\nBookings": Bookings with hotels
+"<<Controllers>>\nBookings" --> "<<JavaScript>>\nServer": 200 OK
+"<<JavaScript>>\nServer" --> Client: {success: true, count: X, data: bookings}
+
+@enduml

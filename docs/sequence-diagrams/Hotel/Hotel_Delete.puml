@@ -1,0 +1,48 @@
+@startuml Hotel_Delete
+title Delete Hotel (DELETE)
+
+actor Client
+participant "<<JavaScript>>\nServer"
+participant "<<Router>>\nHotels"
+participant "<<Middleware>>\nAuth"
+participant "<<Controllers>>\nHotels"
+participant "<<Model>>\nHotel"
+database "<<MongoDB>>\nHotels"
+
+Client -> "<<JavaScript>>\nServer": DELETE /api/v1/hotels/:id\nAuth: Bearer TOKEN
+"<<JavaScript>>\nServer" -> "<<Router>>\nHotels": app.use('/api/v1/hotels')
+"<<Router>>\nHotels" -> "<<Middleware>>\nAuth": protect()
+"<<Middleware>>\nAuth" -> "<<Middleware>>\nAuth": Verify JWT token
+
+alt Token Invalid
+  "<<Middleware>>\nAuth" --> "<<JavaScript>>\nServer": 401 Unauthorized
+  "<<JavaScript>>\nServer" --> Client: {success: false, msg: "No token"}
+else Token Valid
+  "<<Middleware>>\nAuth" -> "<<Middleware>>\nAuth": authorize('admin')
+  
+  alt User NOT Admin
+    "<<Middleware>>\nAuth" --> "<<JavaScript>>\nServer": 403 Forbidden
+    "<<JavaScript>>\nServer" --> Client: {success: false, msg: "Not authorized"}
+  else User is Admin
+    "<<Middleware>>\nAuth" -> "<<Controllers>>\nHotels": deleteHotel(id)
+    "<<Controllers>>\nHotels" -> "<<Model>>\nHotel": findById(id)
+    "<<Model>>\nHotel" -> "<<MongoDB>>\nHotels": Query hotel
+    "<<MongoDB>>\nHotels" --> "<<Model>>\nHotel": Hotel document
+    "<<Model>>\nHotel" --> "<<Controllers>>\nHotels": Hotel object
+    
+    alt Hotel Not Found
+      "<<Controllers>>\nHotels" --> "<<JavaScript>>\nServer": 404 Not Found
+      "<<JavaScript>>\nServer" --> Client: {success: false, msg: "Hotel not found"}
+    else Hotel Found
+      "<<Controllers>>\nHotels" -> "<<Model>>\nHotel": Delete hotel
+      "<<Model>>\nHotel" -> "<<MongoDB>>\nHotels": Delete document
+      note over "<<MongoDB>>\nHotels": Cascade delete\nall bookings
+      "<<MongoDB>>\nHotels" --> "<<Model>>\nHotel": Deleted
+      "<<Model>>\nHotel" --> "<<Controllers>>\nHotels": Deletion confirmed
+      "<<Controllers>>\nHotels" --> "<<JavaScript>>\nServer": 200 OK
+      "<<JavaScript>>\nServer" --> Client: {success: true, data: {}}
+    end
+  end
+end
+
+@enduml

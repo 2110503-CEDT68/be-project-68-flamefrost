@@ -1,0 +1,30 @@
+@startuml User_GetProfile
+title Get User Profile (GET)
+
+actor Client
+participant "<<JavaScript>>\nServer"
+participant "<<Router>>\nAuth"
+participant "<<Middleware>>\nAuthenticaton"
+participant "<<Controllers>>\nAuth"
+participant "<<Model>>\nUser"
+database "<<MongoDB>>\nUsers"
+
+Client -> "<<JavaScript>>\nServer": GET /api/v1/auth/me\nAuth: Bearer TOKEN
+"<<JavaScript>>\nServer" -> "<<Router>>\nAuth": app.use('/api/v1/auth')
+"<<Router>>\nAuth" -> "<<Middleware>>\nAuthenticaton": protect()
+"<<Middleware>>\nAuthenticaton" -> "<<Middleware>>\nAuthenticaton": Verify JWT token
+
+alt Token Invalid/Missing
+  "<<Middleware>>\nAuthenticaton" --> "<<JavaScript>>\nServer": 401 Unauthorized
+  "<<JavaScript>>\nServer" --> Client: {success: false, msg: "No token"}
+else Token Valid
+  "<<Middleware>>\nAuthenticaton" -> "<<Model>>\nUser": findById(user_id)
+  "<<Model>>\nUser" -> "<<MongoDB>>\nUsers": Query user
+  "<<MongoDB>>\nUsers" --> "<<Model>>\nUser": User document
+  "<<Model>>\nUser" --> "<<Middleware>>\nAuthenticaton": User object
+  "<<Middleware>>\nAuthenticaton" -> "<<Controllers>>\nAuth": getMe()
+  "<<Controllers>>\nAuth" --> "<<JavaScript>>\nServer": 200 OK
+  "<<JavaScript>>\nServer" --> Client: {success: true, data: user}
+end
+
+@enduml
